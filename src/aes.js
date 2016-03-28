@@ -1,35 +1,8 @@
 const { compose, curry, __, concat, slice, reduce, repeat, id, flatten, map } = require('ramda');
 const { chunk } = require('lodash');
-const { roundConstant, sBox, mul2, mul3, mul9, mul11, mul13, mul14 } = require('aescons.js');
+const { roundConstant, sBox, mul2, mul3, mul9, mul11, mul13, mul14 } = require('./aescons.js');
+const { rows, columns, rotate } = require('./arrays.js');
 
-
-
-/**
- * mirrorIndexes [[a]] -> [[a]]
- */
-var mirrorIndexes = xss => {
-    var result = [];
-    
-    for (x = 0; x < xss.length; x++) {
-        for (y = 0; y < xss[x].length; y++) {
-            result[x][y] = xss[y][x];
-        }
-    }
-    
-    return result;
-};
-
-/**
- * rows : [a] -> [[a]]
- */
-var rows = curry(chunk)(_, 4);
-
-/**
- * columns : [a] -> [[a]]
- */
-var columns = compose(mirrorIndexes, rows);
-
-var rotate = (n, xs) => concat(slice(0, n, xs), slice(n, xs.length, xs));
 
 var shiftIndexes = 
     [
@@ -50,12 +23,6 @@ var mixColumn = (xs) => {
     
     return result;
 };       
-
-/**
- * powerf : (a -> a) -> Integer -> (a -> a)
- */
-var powerf = compose(reduce(compose, id), repeat);
-
 
 var roundCount = 10;
 
@@ -115,12 +82,12 @@ var subBytes = map(sBox);
 /**
  * shiftRows : [Byte] -> [Byte]
  */
-var shiftRows = map(_, shiftIndexes);
+var shiftRows = map(__, shiftIndexes);
 
 /**
  * mixColumns : [Byte] -> [Byte]
  */
-var mixColumns = compose(flatten, flipIndexes, map(mixColumn), columns);
+var mixColumns = compose(flatten, map(mixColumn), columns);
 
 /**
  * addRoundKey : [[Byte]] -> Number -> [Byte] -> [Byte]
@@ -156,7 +123,7 @@ var encrypt = (key, input) => {
     state = addRoundKey(state, w, 10);
   
     for (var j=0; j < 4 * 10; j++) {
-        output[j] = state[j%4][Math.floor(j/4)];
+        output[j] = state[j % 4][Math.floor(j / 4)];
     }
 
     return output;
@@ -164,5 +131,5 @@ var encrypt = (key, input) => {
 
 
 module.exports = {
-    cipher : cipher
+    mixColumn : mixColumn
 };
