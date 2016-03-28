@@ -1,17 +1,9 @@
 const { compose, curry, __, concat, slice, reduce, repeat, id, flatten, map } = require('ramda');
 const { chunk } = require('lodash');
 const { roundConstant, sBox, mul2, mul3, mul9, mul11, mul13, mul14 } = require('./aescons.js');
-const { rows, columns, rotate } = require('./arrays.js');
+const { rows, columns, rotate, reflectXY } = require('./arrays.js');
+const { trace, noop } = require('./util.js');
 
-
-var shiftIndexes = 
-    [
-         0,  1,  2,  3,
-         5,  6,  7,  4,
-        10, 11,  8,  9,
-        15, 12, 13, 14
-    ] 
-;
 
 var mixColumn = (xs) => {
     var result = [];
@@ -41,12 +33,13 @@ var keyExpansionStep = (w, i) => {
     
     if (i % 4 === 0) {
         temp = compose(map(sBox), rotate)(temp);
-        temp[0] ^= roundConstant[i/4][0];
-        temp[1] ^= roundConstant[i/4][1];
-        temp[2] ^= roundConstant[i/4][2];
-        temp[3] ^= roundConstant[i/4][3];
+        temp[0] ^= roundConstant[i / 4][0];
+        temp[1] ^= roundConstant[i / 4][1];
+        temp[2] ^= roundConstant[i / 4][2];
+        temp[3] ^= roundConstant[i / 4][3];
     } 
     
+    result[i] = [];
     result[i][0] = result[i - 4][0] ^ temp[0];
     result[i][1] = result[i - 4][1] ^ temp[1];
     result[i][2] = result[i - 4][2] ^ temp[2];
@@ -55,21 +48,46 @@ var keyExpansionStep = (w, i) => {
     return result;
 };
 
+var rotWord = rotate(1);
+
+var subWord = map(x => sBox[x]);
 
 /**
  * keyExpansion : [Byte] -> [[Byte]]
  */
 var keyExpansion = key => {    
+    var fn = compose(subWord, rotWord);
+
     var w = [];
+    var temp = [];
     
     w[0] = [ key[ 0], key[ 1], key[ 2], key[ 3] ];
     w[1] = [ key[ 4], key[ 5], key[ 6], key[ 7] ];
     w[2] = [ key[ 8], key[ 9], key[10], key[11] ];
     w[3] = [ key[12], key[13], key[14], key[15] ];
-    
-    for (var i = 4; i < 10; i++) {
-        w = keyExpansionStep(w, i);
-    } 
+
+    for (var i = 4; i < 4 * 10; i++) {
+        w[i] = [];
+
+        temp[0] = w[i - 1][0];
+        temp[1] = w[i - 1][1];
+        temp[2] = w[i - 1][2];
+        temp[3] = w[i - 1][3];
+console.log(temp);
+        if (i % 4 === 0) {
+            temp = fn(temp);
+            temp[0] ^= roundConstant[i / 4][0];
+            temp[1] ^= roundConstant[i / 4][1];
+            temp[2] ^= roundConstant[i / 4][2];
+            temp[3] ^= roundConstant[i / 4][3];
+        }
+console.log(temp);
+
+        w[i][0] = w[i - 4][0] ^ temp[0];
+        w[i][1] = w[i - 4][1] ^ temp[1];
+        w[i][2] = w[i - 4][2] ^ temp[2];
+        w[i][3] = w[i - 4][3] ^ temp[3];
+    }
     
     return w;
 };
@@ -77,17 +95,34 @@ var keyExpansion = key => {
 /**
  * subBytes : [Byte] -> [Byte]
  */
-var subBytes = map(sBox);
+var subBytes = map(x => sBox[x]);
 
 /**
  * shiftRows : [Byte] -> [Byte]
  */
-var shiftRows = map(__, shiftIndexes);
+var shiftRows = xs => {
+    const shiftIndexes =
+        [
+             0,  1,  2,  3,
+             5,  6,  7,  4,
+            10, 11,  8,  9,
+            15, 12, 13, 14
+        ]
+    ;
+
+    var result = [];
+
+    for (var i = 0; i < xs.length; i++) {
+        result[i] = xs[shiftIndexes[i]];
+    }
+
+    return result;
+};
 
 /**
  * mixColumns : [Byte] -> [Byte]
  */
-var mixColumns = compose(flatten, map(mixColumn), columns);
+var mixColumns = compose(flatten, reflectXY, map(mixColumn), columns(4));
 
 /**
  * addRoundKey : [[Byte]] -> Number -> [Byte] -> [Byte]
@@ -132,4 +167,10 @@ var encrypt = (key, input) => {
 
 module.exports = {
     mixColumn : mixColumn
+    , mixColumns : mixColumns
+    , shiftRows : shiftRows
+    , subBytes : subBytes
+    , keyExpansion : keyExpansion
+    , rotWord : rotWord
+    , subWord : subWord
 };
