@@ -18,36 +18,6 @@ var mixColumn = (xs) => {
 
 var roundCount = 10;
 
-/**
- * keyExpansionStep : [[Byte]] -> Integer -> [[Byte]]
- */
-var keyExpansionStep = (w, i) => {
-    var result = w;
-    
-    var temp = [];
-    
-    temp[0] = w[i - 1][0];
-    temp[1] = w[i - 1][1];
-    temp[2] = w[i - 1][2];
-    temp[3] = w[i - 1][3];
-    
-    if (i % 4 === 0) {
-        temp = compose(map(sBox), rotate)(temp);
-        temp[0] ^= roundConstant[i / 4][0];
-        temp[1] ^= roundConstant[i / 4][1];
-        temp[2] ^= roundConstant[i / 4][2];
-        temp[3] ^= roundConstant[i / 4][3];
-    } 
-    
-    result[i] = [];
-    result[i][0] = result[i - 4][0] ^ temp[0];
-    result[i][1] = result[i - 4][1] ^ temp[1];
-    result[i][2] = result[i - 4][2] ^ temp[2];
-    result[i][3] = result[i - 4][3] ^ temp[3];
-
-    return result;
-};
-
 var rotWord = rotate(1);
 
 var subWord = map(x => sBox[x]);
@@ -143,20 +113,20 @@ var addRoundKey = curry( (w, i, s) => {
 var encrypt = (key, input) => {
     var w = keyExpansion(key);
     
-    var state = input;console.log(state);
+    var state = input;
     
-    state = addRoundKey(w, 0, state);console.log(state);
+    state = addRoundKey(w, 0, state);
 
     for (var i = 1; i < 10; i++) {
-        state = subBytes(state);console.log(state);
-        state = shiftRows(state);console.log(state);
-        state = mixColumns(state);console.log(state);
-        state = addRoundKey(w, i, state);console.log(state);
+        state = subBytes(state);
+        state = shiftRows(state);
+        state = mixColumns(state);
+        state = addRoundKey(w, i, state);
     }
 
-    state = subBytes(state);console.log(state);
-    state = shiftRows(state);console.log(state);
-    state = addRoundKey(w, 10, state);console.log(state);
+    state = subBytes(state);
+    state = shiftRows(state);
+    state = addRoundKey(w, 10, state);
 
     return state;
 };

@@ -2,7 +2,7 @@ const { rows, columns, rotate, powerf} = require('../src/arrays.js');
 
 const assert = require('assert');
 
-describe('rext', function() {
+describe('arrays', function() {
 
     describe('rows', function() {
         const flattened = 
