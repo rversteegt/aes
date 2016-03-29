@@ -66,7 +66,7 @@ var keyExpansion = key => {
     w[2] = [ key[ 8], key[ 9], key[10], key[11] ];
     w[3] = [ key[12], key[13], key[14], key[15] ];
 
-    for (var i = 4; i < 4 * 10; i++) {
+    for (var i = 4; i < 44; i++) {
         w[i] = [];
 
         temp[0] = w[i - 1][0];
@@ -127,49 +127,49 @@ var mixColumns = compose(flatten, reflectXY, map(mixColumn), columns(4));
  * addRoundKey : [[Byte]] -> Number -> [Byte] -> [Byte]
  */
 var addRoundKey = curry( (w, i, s) => {
+    var r = rows(4, s);
     var result = [];
-    
+
     for (var x = 0; x < 4; x++ ) {
+        result[x] = [];
         for (var y = 0; y < 4; y++ ) {
-            result[x][y] = s[x][y] ^ w[i * 4 + y][x];
+            result[x][y] = r[x][y] ^ w[i * 4 + y][x];
         }
     }
     
-    return result;    
+    return flatten(result);
 });
 
 var encrypt = (key, input) => {
     var w = keyExpansion(key);
     
-    var state = input;
-
-    state = addRoundKey(state, w, 0);
+    var state = input;console.log(state);
+    
+    state = addRoundKey(w, 0, state);console.log(state);
 
     for (var i = 1; i < 10; i++) {
-        state = subBytes(state);
-        state = shiftRows(state);
-        state = mixColumns(state);
-        state = addRoundKey(state, w, i);
+        state = subBytes(state);console.log(state);
+        state = shiftRows(state);console.log(state);
+        state = mixColumns(state);console.log(state);
+        state = addRoundKey(w, i, state);console.log(state);
     }
 
-    state = subBytes(state);
-    state = shiftRows(state);
-    state = addRoundKey(state, w, 10);
-  
-    for (var j=0; j < 4 * 10; j++) {
-        output[j] = state[j % 4][Math.floor(j / 4)];
-    }
+    state = subBytes(state);console.log(state);
+    state = shiftRows(state);console.log(state);
+    state = addRoundKey(w, 10, state);console.log(state);
 
-    return output;
+    return state;
 };
 
 
 module.exports = {
-    mixColumn : mixColumn
+      mixColumn : mixColumn
     , mixColumns : mixColumns
     , shiftRows : shiftRows
     , subBytes : subBytes
     , keyExpansion : keyExpansion
     , rotWord : rotWord
     , subWord : subWord
+    , addRoundKey : addRoundKey
+    , encrypt : encrypt
 };
