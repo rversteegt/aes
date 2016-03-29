@@ -73,7 +73,7 @@ var keyExpansion = key => {
         temp[1] = w[i - 1][1];
         temp[2] = w[i - 1][2];
         temp[3] = w[i - 1][3];
-console.log(temp);
+
         if (i % 4 === 0) {
             temp = fn(temp);
             temp[0] ^= roundConstant[i / 4][0];
@@ -81,14 +81,13 @@ console.log(temp);
             temp[2] ^= roundConstant[i / 4][2];
             temp[3] ^= roundConstant[i / 4][3];
         }
-console.log(temp);
 
         w[i][0] = w[i - 4][0] ^ temp[0];
         w[i][1] = w[i - 4][1] ^ temp[1];
         w[i][2] = w[i - 4][2] ^ temp[2];
         w[i][3] = w[i - 4][3] ^ temp[3];
     }
-    
+
     return w;
 };
 

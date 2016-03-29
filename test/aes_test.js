@@ -146,8 +146,7 @@ describe('aes', function() {
             assert.deepEqual([0x88, 0x54, 0x2c, 0xb1], expansion[5]);
             assert.deepEqual([0x23, 0xa3, 0x39, 0x39], expansion[6]);
             assert.deepEqual([0x2a, 0x6c, 0x76, 0x05], expansion[7]);
-            assert.deepEqual([0xf2, 0xc2, 0x95, 0xf2], expansion[7]);
-
+            assert.deepEqual([0xf2, 0xc2, 0x95, 0xf2], expansion[8]);
         });
     });
 });
