@@ -2,6 +2,7 @@ const { mixColumn, mixColumns, shiftRows, subBytes, rotWord, subWord, keyExpansi
 const { decrypt } = require('../src/aes-dec.js');
 const { ecbEncrypt, ecbDecrypt} = require('../src/aes-ecb.js');
 
+const { compose } = require('ramda');
 const assert = require('assert');
 
 
@@ -258,27 +259,35 @@ describe('aes', function() {
             assert.deepEqual(output, encrypt(key, input));
         });
 
-         it('should follow appendix C.1', function() {
-            const key =  
+        it('should follow appendix C.1', function() {
+            const key =
                 [
-                    0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e0f
- 
+                    0x00, 0x01, 0x02, 0x03,
+                    0x04, 0x05, 0x06, 0x07,
+                    0x08, 0x09, 0x0a, 0x0b,
+                    0x0c, 0x0d, 0x0e, 0x0f
+
                 ]
             ;
 
-            const input = 
+            const input =
                 [
-                    0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff 
+                    0x00, 0x11, 0x22, 0x33,
+                    0x44, 0x55, 0x66, 0x77,
+                    0x88, 0x99, 0xaa, 0xbb,
+                    0xcc, 0xdd, 0xee, 0xff
                 ]
             ;
 
             const output =
                 [
-                    0x69, 0xc4, 0xe0, 0xd8, 0x6a, 0x7b, 0x04, 0x30, 0xd8, 0xcd, 0xb7, 0x80, 0x70, 0xb4, 0xc5, 0x5a
+                    0x69, 0xc4, 0xe0, 0xd8,
+                    0x6a, 0x7b, 0x04, 0x30,
+                    0xd8, 0xcd, 0xb7, 0x80,
+                    0x70, 0xb4, 0xc5, 0x5a
                 ]
             ;
-
-            // assert.deepEqual(output, encrypt(key, input));
+            assert.deepEqual(output, encrypt(key, input));
         });
 
         it('should follow appendix B: example 1', function() {
@@ -444,19 +453,15 @@ describe('aes', function() {
                 0x25, 0xdc, 0x11, 0x6a,
                 0x84, 0x09, 0x85, 0x0b,
                 0x1d, 0xfb, 0x97, 0x32,
-                0x39, 0x02, 0xdc, 0x19,
-                0x25, 0xdc, 0x11, 0x6a,
-                0x84, 0x09, 0x85, 0x0b,
-                0x1d, 0xfb, 0x97, 0x32,
             ]
         ;
 
-        it('should', function() {
+        it('should do encryption', function() {
             assert.deepEqual(output, ecbEncrypt(key, input));
         });
 
-        it('should', function() {
-            assert.deepEqual(input, ecbEncrypt(key, output));
+        it('should do decryption', function() {
+            assert.deepEqual(input, ecbDecrypt(key, output));
         });
     });
 });

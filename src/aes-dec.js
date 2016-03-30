@@ -39,7 +39,7 @@ var invMixColumn = (xs) => {
 
 var invMixColumns = compose(flatten, reflectXY, map(invMixColumn), columns(4));
 
-var decrypt = (key, input) => {
+var decrypt = curry( (key, input) => {
 	var state = input;
 
 	var w = keyExpansion(key);
@@ -58,7 +58,7 @@ var decrypt = (key, input) => {
     state = addRoundKey(w, 0, state);
 
     return state;
-};
+});
 
 module.exports = {
 	decrypt : decrypt

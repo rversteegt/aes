@@ -110,26 +110,27 @@ var addRoundKey = curry( (w, i, s) => {
     return flatten(result);
 });
 
-var encrypt = (key, input) => {
+var encrypt = curry( (key, input) => {
     var w = keyExpansion(key);
     
     var state = input;
     
     state = addRoundKey(w, 0, state);
-
+    console.log(state);
     for (var i = 1; i < 10; i++) {
         state = subBytes(state);
         state = shiftRows(state);
         state = mixColumns(state);
         state = addRoundKey(w, i, state);
+        console.log(state);
     }
 
     state = subBytes(state);
     state = shiftRows(state);
     state = addRoundKey(w, 10, state);
-
+    console.log(state);
     return state;
-};
+});
 
 
 module.exports = {
